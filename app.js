@@ -12,16 +12,18 @@ loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorMsg.textContent = '';
 
-  const correo = document.getElementById('correo').value.trim();
+  const usuario = document.getElementById('usuario').value.trim();
   const password = document.getElementById('password').value;
 
-  if (!correo || !password) {
-    errorMsg.textContent = 'Completa correo y contraseña.';
+  if (!usuario || !password) {
+    errorMsg.textContent = 'Completa usuario y contraseña.';
     return;
   }
 
+  const correoInterno = usuario.toLowerCase().replace(/\s+/g, '') + '@nexus23.local';
+
   try {
-    const userCredential = await firebase.auth().signInWithEmailAndPassword(correo, password);
+    const userCredential = await firebase.auth().signInWithEmailAndPassword(correoInterno, password);
     const uid = userCredential.user.uid;
 
     const snapshot = await db.ref('usuarios/' + uid).once('value');
@@ -33,16 +35,20 @@ loginForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    sessionStorage.setItem('nexus23_usuario', userData.usuario || correo);
+    if (userData.rol === 'pendiente') {
+      errorMsg.textContent = 'Tu cuenta está pendiente de aprobación por un administrador.';
+      await firebase.auth().signOut();
+      return;
+    }
+
+    sessionStorage.setItem('nexus23_usuario', userData.usuario || usuario);
     sessionStorage.setItem('nexus23_rol', userData.rol || 'usuario');
     window.location.href = 'dashboard.html';
 
   } catch (err) {
     console.error(err);
     if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-      errorMsg.textContent = 'Correo o contraseña incorrectos.';
-    } else if (err.code === 'auth/invalid-email') {
-      errorMsg.textContent = 'El correo no es válido.';
+      errorMsg.textContent = 'Usuario o contraseña incorrectos.';
     } else if (err.code === 'auth/too-many-requests') {
       errorMsg.textContent = 'Demasiados intentos. Espera un momento e intenta de nuevo.';
     } else {

@@ -339,3 +339,68 @@ body.is-admin .admin-only { display: block; }
   .brand-title { font-size: 17px; }
   .logout-btn { padding: 6px 10px; font-size: 12px; }
 }
+
+.signup-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #8b949e;
+}
+.signup-link a {
+  color: #3b9eff;
+  text-decoration: none;
+  font-weight: bold;
+}
+.signup-link a:hover { text-decoration: underline; }
+
+.success-msg {
+  color: #3fb950;
+  font-size: 13px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.users-list { display: flex; flex-direction: column; gap: 12px; }
+
+.user-card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-name { font-size: 15px; font-weight: bold; }
+
+.rol-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.badge-admin { background-color: rgba(59,158,255,0.15); color: #3b9eff; }
+.badge-usuario { background-color: rgba(63,185,80,0.15); color: #3fb950; }
+.badge-pendiente { background-color: rgba(210,153,34,0.15); color: #d29922; }
+
+.user-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.user-actions button {
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-approve { background-color: #3fb950; color: #0d1117; }
+.btn-reject, .btn-delete { background-color: transparent; border: 1px solid #f85149; color: #f85149; }
+.btn-toggle-admin { background-color: transparent; border: 1px solid #3b9eff; color: #3b9eff; }
+
+.loading-text { color: #8b949e; font-size: 13px; }
