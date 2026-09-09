@@ -1,0 +1,8 @@
+{
+  "usuarios": {
+    "david": {
+      "password": "CAMBIA_ESTA_CLAVE",
+      "rol": "admin"
+    }
+  }
+}
