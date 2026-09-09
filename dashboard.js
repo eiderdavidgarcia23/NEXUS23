@@ -1,17 +1,3 @@
-const usuario = sessionStorage.getItem('nexus23_usuario');
-const rol = sessionStorage.getItem('nexus23_rol');
-
-if (!usuario) {
-  window.location.href = 'index.html';
-}
-
-document.getElementById('userLabel').textContent = 'Hola, ' + usuario;
-document.getElementById('sidebarUserLabel').textContent = 'Sesión de ' + usuario;
-
-if (rol === 'admin') {
-  document.body.classList.add('is-admin');
-}
-
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');
 const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -76,12 +62,41 @@ document.getElementById('brandHome').addEventListener('click', () => {
 showView('inicio');
 
 function logout() {
-  sessionStorage.removeItem('nexus23_usuario');
-  sessionStorage.removeItem('nexus23_rol');
-  window.location.href = 'index.html';
+  firebase.auth().signOut().then(() => {
+    sessionStorage.removeItem('nexus23_usuario');
+    sessionStorage.removeItem('nexus23_rol');
+    window.location.href = 'index.html';
+  });
 }
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('logoutBtnSidebar').addEventListener('click', logout);
+
+firebase.auth().onAuthStateChanged(function(user) {
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  db.ref('usuarios/' + user.uid).once('value').then(snapshot => {
+    const userData = snapshot.val();
+
+    if (!userData) {
+      firebase.auth().signOut();
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const nombre = userData.usuario || user.email;
+    const rol = userData.rol || 'usuario';
+
+    document.getElementById('userLabel').textContent = 'Hola, ' + nombre;
+    document.getElementById('sidebarUserLabel').textContent = 'Sesión de ' + nombre;
+
+    if (rol === 'admin') {
+      document.body.classList.add('is-admin');
+    }
+  });
+});
 
 async function checkStatus(url, dotId, statusId) {
   const dot = document.getElementById(dotId);
