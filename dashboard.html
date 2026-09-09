@@ -6,37 +6,81 @@
   <title>NEXUS23 · Dashboard</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body style="flex-direction: column;">
-  <div class="dashboard-header">
-    <h2><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></h2>
-    <div>
-      <span id="userLabel" style="margin-right: 16px; color: #8b949e; font-size: 13px;"></span>
-      <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+<body class="dashboard-page">
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></h2>
+      <button class="sidebar-close" id="sidebarClose">✕</button>
     </div>
-  </div>
 
-  <div class="dashboard-body">
-    <p class="section-label">Tus plataformas</p>
-    <div class="cards-grid">
-
-      <div class="platform-card">
-        <h3>COOPMOCUR</h3>
-        <p>Sistema de inventario y gestión para la cooperativa de motocarros.</p>
-        <div class="platform-status">
-          <span class="status-dot status-checking" id="dotCoopmocur"></span>
-          <span id="statusCoopmocur">Verificando...</span>
-        </div>
-        <a href="https://eiderdavidgarcia23.github.io/coopmocur-system/" target="_blank" class="open-btn">Abrir plataforma →</a>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section admin-only" id="adminSection">
+        <p class="sidebar-section-label">Administración</p>
+        <a href="#" class="sidebar-link" data-view="usuarios">👥 Gestionar usuarios</a>
+        <a href="#" class="sidebar-link" data-view="plataformas">🧩 Agregar/editar plataformas</a>
+        <a href="#" class="sidebar-link" data-view="estadisticas">📊 Ver estadísticas</a>
       </div>
 
-      <div class="platform-card">
-        <h3>Jarvis</h3>
-        <p>Asistente personal con IA, búsqueda web y voz.</p>
-        <div class="platform-status">
-          <span class="status-dot status-checking" id="dotJarvis"></span>
-          <span id="statusJarvis">Verificando...</span>
+      <div class="sidebar-section">
+        <p class="sidebar-section-label">Menú</p>
+        <a href="#" class="sidebar-link" data-view="inicio">🏠 Inicio</a>
+        <a href="#" class="sidebar-link" data-view="cuenta">👤 Cuenta</a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p id="sidebarUserLabel" class="sidebar-user"></p>
+      <button class="logout-btn" id="logoutBtnSidebar">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="dashboard-header">
+      <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+      <h2 class="brand-title" id="brandHome"><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></h2>
+      <div class="header-right">
+        <span id="userLabel"></span>
+        <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+
+      <div id="view-inicio" class="view active-view">
+        <p class="section-label">Tus plataformas</p>
+        <div class="cards-grid">
+
+          <div class="platform-card">
+            <h3>COOPMOCUR</h3>
+            <p>Sistema de inventario y gestión para la cooperativa de motocarros.</p>
+            <div class="platform-status">
+              <span class="status-dot status-checking" id="dotCoopmocur"></span>
+              <span id="statusCoopmocur">Verificando...</span>
+            </div>
+            <a href="https://eiderdavidgarcia23.github.io/coopmocur-system/" target="_blank" class="open-btn">Abrir plataforma →</a>
+          </div>
+
+          <div class="platform-card">
+            <h3>Jarvis</h3>
+            <p>Asistente personal con IA, búsqueda web y voz.</p>
+            <div class="platform-status">
+              <span class="status-dot status-checking" id="dotJarvis"></span>
+              <span id="statusJarvis">Verificando...</span>
+            </div>
+            <a href="https://jarvis-ne7h.onrender.com" target="_blank" class="open-btn">Abrir plataforma →</a>
+          </div>
+
         </div>
-        <a href="https://jarvis-ne7h.onrender.com" target="_blank" class="open-btn">Abrir plataforma →</a>
+      </div>
+
+      <div id="view-placeholder" class="view">
+        <p class="section-label" id="placeholderTitle">Próximamente</p>
+        <div class="placeholder-box">
+          <p id="placeholderText">Esta sección está en construcción.</p>
+        </div>
       </div>
 
     </div>
