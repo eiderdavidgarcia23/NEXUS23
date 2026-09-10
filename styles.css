@@ -404,3 +404,53 @@ body.is-admin .admin-only { display: block; }
 .btn-toggle-admin { background-color: transparent; border: 1px solid #3b9eff; color: #3b9eff; }
 
 .loading-text { color: #8b949e; font-size: 13px; }
+
+/* Evitar scroll horizontal accidental en cualquier pantalla */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Celulares muy angostos (320px - 380px) */
+@media (max-width: 380px) {
+  .login-card {
+    padding: 26px 18px;
+  }
+  .login-card h1 {
+    font-size: 22px;
+  }
+  .dashboard-body {
+    padding: 18px 12px;
+  }
+  .platform-card,
+  .placeholder-box {
+    padding: 14px;
+  }
+  .user-card {
+    padding: 12px 14px;
+  }
+}
+
+/* Tablets (768px en adelante) */
+@media (min-width: 768px) {
+  .dashboard-body {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}
+
+/* Pantallas grandes / escritorio (1200px en adelante) */
+@media (min-width: 1200px) {
+  .dashboard-body {
+    max-width: 1100px;
+  }
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+/* Que el sidebar no se sienta angosto en pantallas grandes */
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 300px;
+  }
+}
