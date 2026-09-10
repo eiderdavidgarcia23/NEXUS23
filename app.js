@@ -14,6 +14,7 @@ loginForm.addEventListener('submit', async (e) => {
 
   const usuario = document.getElementById('usuario').value.trim();
   const password = document.getElementById('password').value;
+  const recuerdame = document.getElementById('remember').checked;
 
   if (!usuario || !password) {
     errorMsg.textContent = 'Completa usuario y contraseña.';
@@ -23,6 +24,12 @@ loginForm.addEventListener('submit', async (e) => {
   const correoInterno = usuario.toLowerCase().replace(/\s+/g, '') + '@nexus23.local';
 
   try {
+    const persistencia = recuerdame
+      ? firebase.auth.Auth.Persistence.LOCAL
+      : firebase.auth.Auth.Persistence.SESSION;
+
+    await firebase.auth().setPersistence(persistencia);
+
     const userCredential = await firebase.auth().signInWithEmailAndPassword(correoInterno, password);
     const uid = userCredential.user.uid;
 
