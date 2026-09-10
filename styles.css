@@ -549,3 +549,10 @@ html, body {
   padding-right: 4px;
   justify-self: start;
 }
+
+/* Botón "Cerrar sesión" del header más compacto, sin partirse en dos líneas */
+#logoutBtn {
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 12px;
+}
