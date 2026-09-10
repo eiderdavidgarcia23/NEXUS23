@@ -583,3 +583,13 @@ html, body {
 .edit-input {
   margin-bottom: 8px;
 }
+
+/* Darle el mismo estilo de botón (relleno, bordes redondeados) a los botones de plataformas */
+.plat-actions button {
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
