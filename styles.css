@@ -496,3 +496,18 @@ html, body {
 }
 .account-msg-error { color: #ff6b6b; }
 .account-msg-success { color: #3fb950; }
+
+/* Arreglo definitivo: header con columnas en vez de posición absoluta */
+.dashboard-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.brand-title {
+  position: static;
+  transform: none;
+  justify-self: center;
+}
+.header-right {
+  justify-self: end;
+}
