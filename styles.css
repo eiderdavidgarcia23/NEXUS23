@@ -539,3 +539,13 @@ html, body {
   text-overflow: ellipsis;
   max-width: 90px;
 }
+
+/* Acercar el ícono de sidebar al borde izquierdo */
+.dashboard-header {
+  padding-left: 10px;
+}
+.hamburger-btn {
+  padding-left: 4px;
+  padding-right: 4px;
+  justify-self: start;
+}
