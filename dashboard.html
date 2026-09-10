@@ -83,6 +83,27 @@
         </div>
       </div>
 
+      <div id="view-cuenta" class="view">
+        <p class="section-label">Mi cuenta</p>
+        <div class="account-box">
+          <p class="account-info">Usuario: <strong id="cuentaUsuarioLabel"></strong></p>
+
+          <form id="cambiarPasswordForm">
+            <label for="passwordActual">Contraseña actual</label>
+            <input type="password" id="passwordActual" required>
+
+            <label for="passwordNueva">Nueva contraseña</label>
+            <input type="password" id="passwordNueva" placeholder="mínimo 6 caracteres" required>
+
+            <label for="passwordNueva2">Confirmar nueva contraseña</label>
+            <input type="password" id="passwordNueva2" required>
+
+            <button type="submit" class="account-btn">Cambiar contraseña</button>
+            <p id="cuentaMsg" class="account-msg"></p>
+          </form>
+        </div>
+      </div>
+
       <div id="view-placeholder" class="view">
         <p class="section-label" id="placeholderTitle">Próximamente</p>
         <div class="placeholder-box">

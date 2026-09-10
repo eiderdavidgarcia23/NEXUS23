@@ -19,11 +19,11 @@ overlay.addEventListener('click', closeSidebar);
 const views = {
   inicio: document.getElementById('view-inicio'),
   usuarios: document.getElementById('view-usuarios'),
+  cuenta: document.getElementById('view-cuenta'),
   placeholder: document.getElementById('view-placeholder')
 };
 
 const placeholderTitles = {
-  cuenta: { title: 'Cuenta', text: 'Aquí podrás ver y editar los datos de tu cuenta. (Próximamente)' },
   plataformas: { title: 'Agregar/editar plataformas', text: 'Aquí podrás agregar o editar las plataformas del dashboard. (Próximamente)' },
   estadisticas: { title: 'Estadísticas', text: 'Aquí verás estadísticas y logs de acceso. (Próximamente)' }
 };
@@ -33,6 +33,7 @@ function showView(viewName) {
 
   views.inicio.classList.remove('active-view');
   views.usuarios.classList.remove('active-view');
+  views.cuenta.classList.remove('active-view');
   views.placeholder.classList.remove('active-view');
 
   if (viewName === 'inicio') {
@@ -40,6 +41,8 @@ function showView(viewName) {
   } else if (viewName === 'usuarios') {
     views.usuarios.classList.add('active-view');
     loadUsersList();
+  } else if (viewName === 'cuenta') {
+    views.cuenta.classList.add('active-view');
   } else {
     views.placeholder.classList.add('active-view');
     const data = placeholderTitles[viewName];
@@ -76,11 +79,15 @@ function logout() {
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('logoutBtnSidebar').addEventListener('click', logout);
 
+let currentUser = null;
+
 firebase.auth().onAuthStateChanged(function(user) {
   if (!user) {
     window.location.href = 'index.html';
     return;
   }
+
+  currentUser = user;
 
   db.ref('usuarios/' + user.uid).once('value').then(snapshot => {
     const userData = snapshot.val();
@@ -96,11 +103,64 @@ firebase.auth().onAuthStateChanged(function(user) {
 
     document.getElementById('userLabel').textContent = 'Hola, ' + nombre;
     document.getElementById('sidebarUserLabel').textContent = 'Sesión de ' + nombre;
+    document.getElementById('cuentaUsuarioLabel').textContent = nombre;
 
     if (rol === 'admin') {
       document.body.classList.add('is-admin');
     }
   });
+});
+
+document.getElementById('cambiarPasswordForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('cuentaMsg');
+  msg.textContent = '';
+  msg.className = 'account-msg';
+
+  const actual = document.getElementById('passwordActual').value;
+  const nueva = document.getElementById('passwordNueva').value;
+  const nueva2 = document.getElementById('passwordNueva2').value;
+
+  if (!actual || !nueva || !nueva2) {
+    msg.textContent = 'Completa todos los campos.';
+    msg.classList.add('account-msg-error');
+    return;
+  }
+
+  if (nueva !== nueva2) {
+    msg.textContent = 'Las contraseñas nuevas no coinciden.';
+    msg.classList.add('account-msg-error');
+    return;
+  }
+
+  if (nueva.length < 6) {
+    msg.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    msg.classList.add('account-msg-error');
+    return;
+  }
+
+  try {
+    const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, actual);
+    await currentUser.reauthenticateWithCredential(credential);
+    await currentUser.updatePassword(nueva);
+
+    msg.textContent = 'Contraseña actualizada correctamente.';
+    msg.classList.add('account-msg-success');
+    document.getElementById('cambiarPasswordForm').reset();
+
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      msg.textContent = 'La contraseña actual es incorrecta.';
+    } else if (err.code === 'auth/weak-password') {
+      msg.textContent = 'La nueva contraseña es muy débil.';
+    } else if (err.code === 'auth/too-many-requests') {
+      msg.textContent = 'Demasiados intentos. Espera un momento e intenta de nuevo.';
+    } else {
+      msg.textContent = 'No se pudo cambiar la contraseña. Intenta de nuevo.';
+    }
+    msg.classList.add('account-msg-error');
+  }
 });
 
 function loadUsersList() {
