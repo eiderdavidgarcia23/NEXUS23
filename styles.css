@@ -556,3 +556,30 @@ html, body {
   padding: 6px 12px;
   font-size: 12px;
 }
+
+.plat-card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+.plat-view {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.plat-name {
+  font-size: 15px;
+  font-weight: bold;
+}
+.plat-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.edit-input {
+  margin-bottom: 8px;
+}

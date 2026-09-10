@@ -51,28 +51,8 @@
 
       <div id="view-inicio" class="view active-view">
         <p class="section-label">Tus plataformas</p>
-        <div class="cards-grid">
-
-          <div class="platform-card">
-            <h3>COOPMOCUR</h3>
-            <p>Sistema de inventario y gestión para la cooperativa de motocarros.</p>
-            <div class="platform-status">
-              <span class="status-dot status-checking" id="dotCoopmocur"></span>
-              <span id="statusCoopmocur">Verificando...</span>
-            </div>
-            <a href="https://eiderdavidgarcia23.github.io/coopmocur-system/" target="_blank" class="open-btn">Abrir plataforma →</a>
-          </div>
-
-          <div class="platform-card">
-            <h3>Jarvis</h3>
-            <p>Asistente personal con IA, búsqueda web y voz.</p>
-            <div class="platform-status">
-              <span class="status-dot status-checking" id="dotJarvis"></span>
-              <span id="statusJarvis">Verificando...</span>
-            </div>
-            <a href="https://jarvis-ne7h.onrender.com" target="_blank" class="open-btn">Abrir plataforma →</a>
-          </div>
-
+        <div id="plataformasGrid" class="cards-grid">
+          <p class="loading-text">Cargando plataformas...</p>
         </div>
       </div>
 
@@ -80,6 +60,30 @@
         <p class="section-label">Gestionar usuarios</p>
         <div id="usuariosList" class="users-list">
           <p class="loading-text">Cargando usuarios...</p>
+        </div>
+      </div>
+
+      <div id="view-plataformas" class="view">
+        <p class="section-label">Agregar/editar plataformas</p>
+
+        <div class="account-box" style="max-width: 500px; margin-bottom: 24px;">
+          <form id="agregarPlataformaForm">
+            <label for="nombrePlataforma">Nombre</label>
+            <input type="text" id="nombrePlataforma" required>
+
+            <label for="descPlataforma">Descripción</label>
+            <input type="text" id="descPlataforma" required>
+
+            <label for="urlPlataforma">URL</label>
+            <input type="text" id="urlPlataforma" placeholder="https://...">
+
+            <button type="submit" class="account-btn">Agregar plataforma</button>
+            <p id="plataformaMsg" class="account-msg"></p>
+          </form>
+        </div>
+
+        <div id="plataformasAdminList" class="users-list">
+          <p class="loading-text">Cargando plataformas...</p>
         </div>
       </div>
 

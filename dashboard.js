@@ -19,12 +19,12 @@ overlay.addEventListener('click', closeSidebar);
 const views = {
   inicio: document.getElementById('view-inicio'),
   usuarios: document.getElementById('view-usuarios'),
+  plataformas: document.getElementById('view-plataformas'),
   cuenta: document.getElementById('view-cuenta'),
   placeholder: document.getElementById('view-placeholder')
 };
 
 const placeholderTitles = {
-  plataformas: { title: 'Agregar/editar plataformas', text: 'Aquí podrás agregar o editar las plataformas del dashboard. (Próximamente)' },
   estadisticas: { title: 'Estadísticas', text: 'Aquí verás estadísticas y logs de acceso. (Próximamente)' }
 };
 
@@ -33,14 +33,19 @@ function showView(viewName) {
 
   views.inicio.classList.remove('active-view');
   views.usuarios.classList.remove('active-view');
+  views.plataformas.classList.remove('active-view');
   views.cuenta.classList.remove('active-view');
   views.placeholder.classList.remove('active-view');
 
   if (viewName === 'inicio') {
     views.inicio.classList.add('active-view');
+    loadPlataformasInicio();
   } else if (viewName === 'usuarios') {
     views.usuarios.classList.add('active-view');
     loadUsersList();
+  } else if (viewName === 'plataformas') {
+    views.plataformas.classList.add('active-view');
+    loadPlataformasAdmin();
   } else if (viewName === 'cuenta') {
     views.cuenta.classList.add('active-view');
   } else {
@@ -66,8 +71,6 @@ document.getElementById('brandHome').addEventListener('click', () => {
   showView('inicio');
   closeSidebar();
 });
-
-showView('inicio');
 
 function logout() {
   firebase.auth().signOut().then(() => {
@@ -108,6 +111,8 @@ firebase.auth().onAuthStateChanged(function(user) {
     if (rol === 'admin') {
       document.body.classList.add('is-admin');
     }
+
+    showView('inicio');
   });
 });
 
@@ -211,45 +216,189 @@ function loadUsersList() {
       container.appendChild(card);
     });
 
-    attachUserActionListeners();
+    document.querySelectorAll('#usuariosList .btn-approve').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        db.ref('usuarios/' + uid + '/rol').set('usuario').then(loadUsersList);
+      });
+    });
+
+    document.querySelectorAll('#usuariosList .btn-reject').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        if (confirm('¿Rechazar y eliminar esta cuenta pendiente?')) {
+          db.ref('usuarios/' + uid).remove().then(loadUsersList);
+        }
+      });
+    });
+
+    document.querySelectorAll('#usuariosList .btn-toggle-admin').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        const nuevoRol = btn.dataset.newrol;
+        db.ref('usuarios/' + uid + '/rol').set(nuevoRol).then(loadUsersList);
+      });
+    });
+
+    document.querySelectorAll('#usuariosList .btn-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        if (confirm('¿Eliminar este usuario? No podrá volver a entrar a la plataforma.')) {
+          db.ref('usuarios/' + uid).remove().then(loadUsersList);
+        }
+      });
+    });
+
   }).catch(err => {
     console.error(err);
     container.innerHTML = '<p class="loading-text">No se pudo cargar la lista de usuarios.</p>';
   });
 }
 
-function attachUserActionListeners() {
-  document.querySelectorAll('.btn-approve').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const uid = btn.dataset.uid;
-      db.ref('usuarios/' + uid + '/rol').set('usuario').then(loadUsersList);
-    });
-  });
+function loadPlataformasInicio() {
+  const container = document.getElementById('plataformasGrid');
+  container.innerHTML = '<p class="loading-text">Cargando plataformas...</p>';
 
-  document.querySelectorAll('.btn-reject').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const uid = btn.dataset.uid;
-      if (confirm('¿Rechazar y eliminar esta cuenta pendiente?')) {
-        db.ref('usuarios/' + uid).remove().then(loadUsersList);
-      }
-    });
-  });
+  db.ref('plataformas').once('value').then(snapshot => {
+    const data = snapshot.val() || {};
+    const ids = Object.keys(data);
 
-  document.querySelectorAll('.btn-toggle-admin').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const uid = btn.dataset.uid;
-      const nuevoRol = btn.dataset.newrol;
-      db.ref('usuarios/' + uid + '/rol').set(nuevoRol).then(loadUsersList);
-    });
-  });
+    if (ids.length === 0) {
+      container.innerHTML = '<p class="loading-text">Aún no hay plataformas agregadas.</p>';
+      return;
+    }
 
-  document.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const uid = btn.dataset.uid;
-      if (confirm('¿Eliminar este usuario? No podrá volver a entrar a la plataforma.')) {
-        db.ref('usuarios/' + uid).remove().then(loadUsersList);
-      }
+    container.innerHTML = '';
+
+    ids.forEach(id => {
+      const p = data[id];
+      const card = document.createElement('div');
+      card.className = 'platform-card';
+      card.innerHTML =
+        '<h3>' + p.nombre + '</h3>' +
+        '<p>' + p.descripcion + '</p>' +
+        '<div class="platform-status">' +
+          '<span class="status-dot status-checking" id="dot-' + id + '"></span>' +
+          '<span id="status-' + id + '">Verificando...</span>' +
+        '</div>' +
+        '<a href="' + p.url + '" target="_blank" class="open-btn">Abrir plataforma →</a>';
+      container.appendChild(card);
+      checkStatus(p.url, 'dot-' + id, 'status-' + id);
     });
+  }).catch(err => {
+    console.error(err);
+    container.innerHTML = '<p class="loading-text">No se pudieron cargar las plataformas.</p>';
+  });
+}
+
+document.getElementById('agregarPlataformaForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('plataformaMsg');
+  msg.textContent = '';
+  msg.className = 'account-msg';
+
+  const nombre = document.getElementById('nombrePlataforma').value.trim();
+  const descripcion = document.getElementById('descPlataforma').value.trim();
+  const url = document.getElementById('urlPlataforma').value.trim();
+
+  if (!nombre || !descripcion || !url) {
+    msg.textContent = 'Completa todos los campos.';
+    msg.classList.add('account-msg-error');
+    return;
+  }
+
+  try {
+    const nuevaRef = db.ref('plataformas').push();
+    await nuevaRef.set({ nombre, descripcion, url });
+
+    msg.textContent = 'Plataforma agregada.';
+    msg.classList.add('account-msg-success');
+    document.getElementById('agregarPlataformaForm').reset();
+    loadPlataformasAdmin();
+
+  } catch (err) {
+    console.error(err);
+    msg.textContent = 'No se pudo agregar la plataforma.';
+    msg.classList.add('account-msg-error');
+  }
+});
+
+function loadPlataformasAdmin() {
+  const container = document.getElementById('plataformasAdminList');
+  container.innerHTML = '<p class="loading-text">Cargando plataformas...</p>';
+
+  db.ref('plataformas').once('value').then(snapshot => {
+    const data = snapshot.val() || {};
+    const ids = Object.keys(data);
+
+    if (ids.length === 0) {
+      container.innerHTML = '<p class="loading-text">No hay plataformas agregadas.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+
+    ids.forEach(id => {
+      const p = data[id];
+      const card = document.createElement('div');
+      card.className = 'plat-card';
+      card.dataset.id = id;
+
+      card.innerHTML =
+        '<div class="plat-view">' +
+          '<span class="plat-name">' + p.nombre + '</span>' +
+          '<div class="plat-actions">' +
+            '<button class="btn-toggle-admin btn-plat-editar" data-id="' + id + '">Editar</button>' +
+            '<button class="btn-delete btn-plat-eliminar" data-id="' + id + '">Eliminar</button>' +
+          '</div>' +
+        '</div>';
+
+      container.appendChild(card);
+    });
+
+    document.querySelectorAll('.btn-plat-editar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const p = data[id];
+        const card = btn.closest('.plat-card');
+
+        card.innerHTML =
+          '<input type="text" class="edit-input edit-nombre" value="' + p.nombre + '">' +
+          '<input type="text" class="edit-input edit-desc" value="' + p.descripcion + '">' +
+          '<input type="text" class="edit-input edit-url" value="' + p.url + '">' +
+          '<div class="plat-actions">' +
+            '<button class="btn-approve btn-plat-guardar">Guardar</button>' +
+            '<button class="btn-reject btn-plat-cancelar">Cancelar</button>' +
+          '</div>';
+
+        card.querySelector('.btn-plat-guardar').addEventListener('click', () => {
+          const nuevoNombre = card.querySelector('.edit-nombre').value.trim();
+          const nuevaDesc = card.querySelector('.edit-desc').value.trim();
+          const nuevaUrl = card.querySelector('.edit-url').value.trim();
+
+          db.ref('plataformas/' + id).update({
+            nombre: nuevoNombre,
+            descripcion: nuevaDesc,
+            url: nuevaUrl
+          }).then(loadPlataformasAdmin);
+        });
+
+        card.querySelector('.btn-plat-cancelar').addEventListener('click', loadPlataformasAdmin);
+      });
+    });
+
+    document.querySelectorAll('.btn-plat-eliminar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        if (confirm('¿Eliminar esta plataforma?')) {
+          db.ref('plataformas/' + id).remove().then(loadPlataformasAdmin);
+        }
+      });
+    });
+
+  }).catch(err => {
+    console.error(err);
+    container.innerHTML = '<p class="loading-text">No se pudo cargar la lista.</p>';
   });
 }
 
@@ -265,6 +414,3 @@ async function checkStatus(url, dotId, statusId) {
     status.textContent = 'No disponible';
   }
 }
-
-checkStatus('https://eiderdavidgarcia23.github.io/coopmocur-system/', 'dotCoopmocur', 'statusCoopmocur');
-checkStatus('https://jarvis-ne7h.onrender.com', 'dotJarvis', 'statusJarvis');
