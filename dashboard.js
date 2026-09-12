@@ -40,7 +40,10 @@ function iniciarDashboard() {
   document.getElementById('cuentaEstado').textContent = 'Aprobado';
 
   cargarPlataformas();
-  if (rolActual === 'admin') cargarUsuariosPendientes();
+  if (rolActual === 'admin') {
+    cargarUsuariosPendientes();
+    cargarTodosLosUsuarios();
+  }
 }
 
 // --- Sidebar: hamburguesa (móvil) ---
@@ -237,3 +240,110 @@ function cargarUsuariosPendientes() {
     });
   });
 }
+
+// --- Administración: gestión completa de usuarios (CRUD) ---
+const adminUsersList = document.getElementById('adminUsersList');
+const usuariosRefGlobal = db.ref('usuarios');
+
+function cargarTodosLosUsuarios() {
+  usuariosRefGlobal.on('value', (snapshot) => {
+    const usuarios = snapshot.val() || {};
+    const entries = Object.entries(usuarios);
+
+    adminUsersList.innerHTML = '';
+
+    if (entries.length === 0) {
+      adminUsersList.innerHTML = '<p class="empty-msg">No hay usuarios registrados.</p>';
+      return;
+    }
+
+    entries.forEach(([uid, datos]) => {
+      const row = document.createElement('div');
+      row.className = 'admin-user-row';
+      const estado = datos.estado === 'pendiente' ? 'Pendiente' : 'Aprobado';
+      const rol = datos.rol === 'admin' ? 'Administrador' : 'Usuario';
+      row.innerHTML = `
+        <div>
+          <strong>${datos.usuario || uid}</strong>
+          <span class="admin-platform-url">${rol} · ${estado}</span>
+        </div>
+        <div class="admin-user-actions">
+          <button class="edit-btn" data-uid="${uid}" data-action="rol">Cambiar rol</button>
+          <button class="edit-btn" data-uid="${uid}" data-action="estado">${datos.estado === 'pendiente' ? 'Aprobar' : 'Suspender'}</button>
+          <button class="delete-btn" data-uid="${uid}">Eliminar</button>
+        </div>
+      `;
+      adminUsersList.appendChild(row);
+    });
+
+    adminUsersList.querySelectorAll('.edit-btn[data-action="rol"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        const actual = usuarios[uid].rol === 'admin' ? 'admin' : 'usuario';
+        const nuevoRol = actual === 'admin' ? 'usuario' : 'admin';
+        if (uid === uidActual && nuevoRol !== 'admin' && !confirm('Vas a quitarte tu propio rol de administrador. ¿Continuar?')) return;
+        usuariosRefGlobal.child(uid).update({ rol: nuevoRol });
+      });
+    });
+
+    adminUsersList.querySelectorAll('.edit-btn[data-action="estado"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        if (uid === uidActual) { alert('No puedes cambiar el estado de tu propia cuenta.'); return; }
+        const actual = usuarios[uid].estado === 'pendiente' ? 'pendiente' : 'aprobado';
+        const nuevoEstado = actual === 'pendiente' ? 'aprobado' : 'pendiente';
+        usuariosRefGlobal.child(uid).update({ estado: nuevoEstado });
+      });
+    });
+
+    adminUsersList.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const uid = btn.dataset.uid;
+        if (uid === uidActual) { alert('No puedes eliminar tu propia cuenta desde aquí.'); return; }
+        if (confirm('¿Eliminar este usuario del sistema? Esto no se puede deshacer.')) {
+          usuariosRefGlobal.child(uid).remove();
+        }
+      });
+    });
+  });
+}
+
+// Crear usuario nuevo desde el panel de admin, sin cerrar tu propia sesión
+function obtenerAuthSecundaria() {
+  const existente = firebase.apps.find(a => a.name === 'AdminCreate');
+  const secondaryApp = existente || firebase.initializeApp(firebaseConfig, 'AdminCreate');
+  return firebase.auth(secondaryApp);
+}
+
+document.getElementById('addUserBtn').addEventListener('click', async () => {
+  const usuario = prompt('Usuario para la nueva cuenta:');
+  if (!usuario) return;
+  const password = prompt('Contraseña (mínimo 6 caracteres):');
+  if (!password) return;
+  if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres.'); return; }
+  const esAdmin = confirm('¿Será administrador?\n\nAceptar = Administrador\nCancelar = Usuario normal');
+
+  const correoInterno = usuario.toLowerCase().replace(/\s+/g, '') + '@nexus23.local';
+  const secondaryAuth = obtenerAuthSecundaria();
+
+  try {
+    const credencial = await secondaryAuth.createUserWithEmailAndPassword(correoInterno, password);
+    const uid = credencial.user.uid;
+    await db.ref('usuarios/' + uid).set({
+      usuario: usuario,
+      rol: esAdmin ? 'admin' : 'usuario',
+      estado: 'aprobado'
+    });
+    await secondaryAuth.signOut();
+    alert('Usuario creado y aprobado correctamente.');
+  } catch (err) {
+    console.error(err);
+    if (err.code === 'auth/email-already-in-use') {
+      alert('Ese usuario ya existe.');
+    } else if (err.code === 'auth/weak-password') {
+      alert('La contraseña es muy débil.');
+    } else {
+      alert('Error al crear el usuario.');
+    }
+  }
+});

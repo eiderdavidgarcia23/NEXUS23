@@ -368,7 +368,7 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   gap: 8px;
 }
 
-.pending-row, .admin-platform-row {
+.pending-row, .admin-platform-row, .admin-user-row {
   background-color: #161b22;
   border: 1px solid #30363d;
   border-radius: 8px;
@@ -394,7 +394,7 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   word-break: break-all;
 }
 
-.pending-actions, .admin-platform-actions {
+.pending-actions, .admin-platform-actions, .admin-user-actions {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
