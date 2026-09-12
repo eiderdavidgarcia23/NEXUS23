@@ -43,6 +43,7 @@ function iniciarDashboard() {
   if (rolActual === 'admin') cargarUsuariosPendientes();
 }
 
+// --- Sidebar: hamburguesa (móvil) ---
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
@@ -59,6 +60,7 @@ document.getElementById('hamburgerBtn').addEventListener('click', () => {
 });
 sidebarOverlay.addEventListener('click', closeSidebar);
 
+// --- Navegación entre secciones ---
 const navItems = document.querySelectorAll('.nav-item');
 const views = document.querySelectorAll('.view');
 
@@ -72,6 +74,14 @@ navItems.forEach(item => {
   });
 });
 
+document.getElementById('brandHome').addEventListener('click', () => {
+  navItems.forEach(i => i.classList.remove('active'));
+  document.querySelector('.nav-item[data-section="inicio"]').classList.add('active');
+  views.forEach(v => v.id === 'view-inicio' ? v.removeAttribute('hidden') : v.setAttribute('hidden', ''));
+  closeSidebar();
+});
+
+// --- Plataformas (Inicio) ---
 const DEFAULT_PLATFORMS = {
   coopmocur: {
     nombre: 'Deli Maní',
@@ -187,6 +197,7 @@ async function cargarPlataformas() {
   });
 }
 
+// --- Administración: usuarios pendientes (ahora guardados por UID) ---
 function cargarUsuariosPendientes() {
   const pendingList = document.getElementById('pendingList');
   const pendingEmptyMsg = document.getElementById('pendingEmptyMsg');
