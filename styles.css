@@ -87,7 +87,8 @@ input:focus {
 
 .checkbox-row label { margin: 0; }
 
-button#loginBtn {
+button#loginBtn,
+button#registerBtn {
   width: 100%;
   margin-top: 24px;
   padding: 13px;
@@ -101,7 +102,8 @@ button#loginBtn {
   transition: background-color 0.2s;
 }
 
-button#loginBtn:hover {
+button#loginBtn:hover,
+button#registerBtn:hover {
   background-color: #2884e0;
 }
 
@@ -372,9 +374,16 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   border-radius: 8px;
   padding: 12px 16px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   font-size: 14px;
+}
+
+.admin-platform-row > div:first-child {
+  flex: 1 1 200px;
+  min-width: 0;
 }
 
 .admin-platform-url {
@@ -382,11 +391,13 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   color: #8b949e;
   font-size: 12px;
   margin-top: 2px;
+  word-break: break-all;
 }
 
 .pending-actions, .admin-platform-actions {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .approve-btn, .edit-btn {
