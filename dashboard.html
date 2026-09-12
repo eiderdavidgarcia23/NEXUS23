@@ -4,123 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NEXUS23 · Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-body-tag">
+  <div class="app-shell">
 
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand"><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></div>
 
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <h2><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></h2>
-      <button class="sidebar-close" id="sidebarClose">✕</button>
-    </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-section="inicio">
+          <span class="nav-icon">◧</span> Inicio
+        </button>
+        <button class="nav-item" data-section="admin" id="navAdmin" hidden>
+          <span class="nav-icon">⚙</span> Administración
+        </button>
+        <button class="nav-item" data-section="cuenta">
+          <span class="nav-icon">◔</span> Cuenta
+        </button>
+      </nav>
 
-    <nav class="sidebar-nav">
-      <div class="sidebar-section admin-only" id="adminSection">
-        <p class="sidebar-section-label">Administración</p>
-        <a href="#" class="sidebar-link" data-view="usuarios">👥 Gestionar usuarios</a>
-        <a href="#" class="sidebar-link" data-view="plataformas">🧩 Agregar/editar plataformas</a>
-        <a href="#" class="sidebar-link" data-view="estadisticas">📊 Ver estadísticas</a>
-      </div>
+      <button class="sidebar-logout" id="logoutBtn">Cerrar sesión</button>
+    </aside>
 
-      <div class="sidebar-section">
-        <p class="sidebar-section-label">Menú</p>
-        <a href="#" class="sidebar-link" data-view="inicio">🏠 Inicio</a>
-        <a href="#" class="sidebar-link" data-view="cuenta">👤 Cuenta</a>
-      </div>
-    </nav>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <div class="sidebar-footer">
-      <p id="sidebarUserLabel" class="sidebar-user"></p>
-      <button class="logout-btn" id="logoutBtnSidebar">Cerrar sesión</button>
-    </div>
-  </aside>
+    <div class="main-area">
+      <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú">☰</button>
+        <span id="userLabel" class="user-label"></span>
+      </header>
 
-  <div class="main-content">
-    <div class="dashboard-header">
-      <button class="hamburger-btn" id="hamburgerBtn">☰</button>
-      <h2 class="brand-title" id="brandHome"><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></h2>
-      <div class="header-right">
-        <span id="userLabel"></span>
-        <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
-      </div>
-    </div>
+      <main class="content">
 
-    <div class="dashboard-body">
+        <section class="view" id="view-inicio">
+          <p class="section-label">Tus plataformas</p>
+          <div class="cards-grid" id="platformsGrid"></div>
+        </section>
 
-      <div id="view-inicio" class="view active-view">
-        <p class="section-label">Tus plataformas</p>
-        <div id="plataformasGrid" class="cards-grid">
-          <p class="loading-text">Cargando plataformas...</p>
-        </div>
-      </div>
+        <section class="view" id="view-admin" hidden>
+          <p class="section-label">Usuarios pendientes</p>
+          <div class="pending-list" id="pendingList">
+            <p class="empty-msg" id="pendingEmptyMsg">No hay usuarios pendientes.</p>
+          </div>
 
-      <div id="view-usuarios" class="view">
-        <p class="section-label">Gestionar usuarios</p>
-        <div id="usuariosList" class="users-list">
-          <p class="loading-text">Cargando usuarios...</p>
-        </div>
-      </div>
+          <p class="section-label section-label-spaced">Plataformas</p>
+          <div class="admin-platforms-list" id="adminPlatformsList"></div>
+          <button class="add-platform-btn" id="addPlatformBtn">+ Agregar plataforma</button>
+        </section>
 
-      <div id="view-plataformas" class="view">
-        <p class="section-label">Agregar/editar plataformas</p>
+        <section class="view" id="view-cuenta" hidden>
+          <p class="section-label">Tu cuenta</p>
+          <div class="account-card">
+            <div class="account-row">
+              <span class="account-label">Usuario</span>
+              <span class="account-value" id="cuentaUsuario"></span>
+            </div>
+            <div class="account-row">
+              <span class="account-label">Rol</span>
+              <span class="account-value" id="cuentaRol"></span>
+            </div>
+            <div class="account-row">
+              <span class="account-label">Estado</span>
+              <span class="account-value" id="cuentaEstado"></span>
+            </div>
+          </div>
+        </section>
 
-        <div class="account-box" style="max-width: 500px; margin-bottom: 24px;">
-          <form id="agregarPlataformaForm">
-            <label for="nombrePlataforma">Nombre</label>
-            <input type="text" id="nombrePlataforma" required>
-
-            <label for="descPlataforma">Descripción</label>
-            <input type="text" id="descPlataforma" required>
-
-            <label for="urlPlataforma">URL</label>
-            <input type="text" id="urlPlataforma" placeholder="https://...">
-
-            <button type="submit" class="account-btn">Agregar plataforma</button>
-            <p id="plataformaMsg" class="account-msg"></p>
-          </form>
-        </div>
-
-        <div id="plataformasAdminList" class="users-list">
-          <p class="loading-text">Cargando plataformas...</p>
-        </div>
-      </div>
-
-      <div id="view-cuenta" class="view">
-        <p class="section-label">Mi cuenta</p>
-        <div class="account-box">
-          <p class="account-info">Usuario: <strong id="cuentaUsuarioLabel"></strong></p>
-
-          <form id="cambiarPasswordForm">
-            <label for="passwordActual">Contraseña actual</label>
-            <input type="password" id="passwordActual" required>
-
-            <label for="passwordNueva">Nueva contraseña</label>
-            <input type="password" id="passwordNueva" placeholder="mínimo 6 caracteres" required>
-
-            <label for="passwordNueva2">Confirmar nueva contraseña</label>
-            <input type="password" id="passwordNueva2" required>
-
-            <button type="submit" class="account-btn">Cambiar contraseña</button>
-            <p id="cuentaMsg" class="account-msg"></p>
-          </form>
-        </div>
-      </div>
-
-      <div id="view-placeholder" class="view">
-        <p class="section-label" id="placeholderTitle">Próximamente</p>
-        <div class="placeholder-box">
-          <p id="placeholderText">Esta sección está en construcción.</p>
-        </div>
-      </div>
-
+      </main>
     </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="dashboard.js"></script>
 </body>
