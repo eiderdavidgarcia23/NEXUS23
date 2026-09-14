@@ -84,6 +84,100 @@ document.getElementById('brandHome').addEventListener('click', () => {
   closeSidebar();
 });
 
+// --- Modal reutilizable (reemplaza los prompt() nativos del navegador) ---
+function openModal({ title, fields, submitLabel }) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    const titleEl = document.getElementById('modalTitle');
+    const fieldsEl = document.getElementById('modalFields');
+    const errorEl = document.getElementById('modalError');
+    const acceptBtn = document.getElementById('modalAcceptBtn');
+    const cancelBtn = document.getElementById('modalCancelBtn');
+
+    titleEl.textContent = title;
+    errorEl.textContent = '';
+    fieldsEl.innerHTML = '';
+    acceptBtn.textContent = submitLabel || 'Aceptar';
+
+    fields.forEach((f) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'modal-field';
+
+      const label = document.createElement('label');
+      label.textContent = f.label;
+      label.setAttribute('for', 'modal-input-' + f.id);
+      wrap.appendChild(label);
+
+      let input;
+      if (f.type === 'select') {
+        input = document.createElement('select');
+        (f.options || []).forEach((opt) => {
+          const optionEl = document.createElement('option');
+          optionEl.value = opt.value;
+          optionEl.textContent = opt.label;
+          if (opt.value === f.value) optionEl.selected = true;
+          input.appendChild(optionEl);
+        });
+      } else {
+        input = document.createElement('input');
+        input.type = f.type || 'text';
+        input.value = f.value || '';
+        if (f.placeholder) input.placeholder = f.placeholder;
+      }
+      input.id = 'modal-input-' + f.id;
+      wrap.appendChild(input);
+      fieldsEl.appendChild(wrap);
+    });
+
+    overlay.classList.add('visible');
+    const firstInput = fieldsEl.querySelector('input, select');
+    if (firstInput) setTimeout(() => firstInput.focus(), 50);
+
+    function cleanup() {
+      overlay.classList.remove('visible');
+      acceptBtn.removeEventListener('click', onAccept);
+      cancelBtn.removeEventListener('click', onCancel);
+      overlay.removeEventListener('click', onOverlayClick);
+      document.removeEventListener('keydown', onKeydown);
+    }
+
+    function onAccept() {
+      const values = {};
+      for (const f of fields) {
+        const el = document.getElementById('modal-input-' + f.id);
+        values[f.id] = el.value.trim();
+      }
+      for (const f of fields) {
+        if (f.required !== false && !values[f.id]) {
+          errorEl.textContent = 'Completa el campo "' + f.label + '".';
+          return;
+        }
+      }
+      cleanup();
+      resolve(values);
+    }
+
+    function onCancel() {
+      cleanup();
+      resolve(null);
+    }
+
+    function onOverlayClick(e) {
+      if (e.target === overlay) onCancel();
+    }
+
+    function onKeydown(e) {
+      if (e.key === 'Escape') onCancel();
+      if (e.key === 'Enter' && document.activeElement.tagName !== 'SELECT') onAccept();
+    }
+
+    acceptBtn.addEventListener('click', onAccept);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', onOverlayClick);
+    document.addEventListener('keydown', onKeydown);
+  });
+}
+
 // --- Plataformas (Inicio) ---
 const DEFAULT_PLATFORMS = {
   coopmocur: {
@@ -169,13 +263,16 @@ function renderPlatforms(platforms) {
 }
 
 async function editPlatform(id, current) {
-  const nombre = prompt('Nombre de la plataforma:', current.nombre);
-  if (nombre === null) return;
-  const descripcion = prompt('Descripción:', current.descripcion || '');
-  if (descripcion === null) return;
-  const url = prompt('URL:', current.url);
-  if (url === null) return;
-  await platformsRef.child(id).set({ nombre, descripcion, url });
+  const result = await openModal({
+    title: 'Editar plataforma',
+    fields: [
+      { id: 'nombre', label: 'Nombre', value: current.nombre },
+      { id: 'descripcion', label: 'Descripción', value: current.descripcion || '', required: false },
+      { id: 'url', label: 'URL', value: current.url }
+    ]
+  });
+  if (!result) return;
+  await platformsRef.child(id).set({ nombre: result.nombre, descripcion: result.descripcion, url: result.url });
 }
 
 async function deletePlatform(id) {
@@ -184,13 +281,17 @@ async function deletePlatform(id) {
 }
 
 document.getElementById('addPlatformBtn').addEventListener('click', async () => {
-  const nombre = prompt('Nombre de la nueva plataforma:');
-  if (!nombre) return;
-  const descripcion = prompt('Descripción:') || '';
-  const url = prompt('URL:');
-  if (!url) return;
-  const id = nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  await platformsRef.child(id).set({ nombre, descripcion, url });
+  const result = await openModal({
+    title: 'Agregar plataforma',
+    fields: [
+      { id: 'nombre', label: 'Nombre' },
+      { id: 'descripcion', label: 'Descripción', required: false },
+      { id: 'url', label: 'URL' }
+    ]
+  });
+  if (!result) return;
+  const id = result.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  await platformsRef.child(id).set({ nombre: result.nombre, descripcion: result.descripcion, url: result.url });
 });
 
 async function cargarPlataformas() {
@@ -316,12 +417,28 @@ function obtenerAuthSecundaria() {
 }
 
 document.getElementById('addUserBtn').addEventListener('click', async () => {
-  const usuario = prompt('Usuario para la nueva cuenta:');
-  if (!usuario) return;
-  const password = prompt('Contraseña (mínimo 6 caracteres):');
-  if (!password) return;
+  const result = await openModal({
+    title: 'Crear usuario',
+    fields: [
+      { id: 'usuario', label: 'Usuario' },
+      { id: 'password', label: 'Contraseña (mínimo 6 caracteres)', type: 'password' },
+      {
+        id: 'rol',
+        label: 'Tipo de cuenta',
+        type: 'select',
+        value: 'usuario',
+        options: [
+          { value: 'usuario', label: 'Usuario normal' },
+          { value: 'admin', label: 'Administrador' }
+        ]
+      }
+    ]
+  });
+  if (!result) return;
+  const usuario = result.usuario;
+  const password = result.password;
   if (password.length < 6) { alert('La contraseña debe tener al menos 6 caracteres.'); return; }
-  const esAdmin = confirm('¿Será administrador?\n\nAceptar = Administrador\nCancelar = Usuario normal');
+  const esAdmin = result.rol === 'admin';
 
   const correoInterno = usuario.toLowerCase().replace(/\s+/g, '') + '@nexus23.local';
   const secondaryAuth = obtenerAuthSecundaria();

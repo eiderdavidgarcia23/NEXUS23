@@ -488,3 +488,111 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
 
   .sidebar.open { transform: translateX(0); }
 }
+
+/* ===== Modal (reemplaza los prompt() nativos) ===== */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+.modal-card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 28px 26px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.modal-title {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.modal-field { margin-top: 0; margin-bottom: 14px; }
+
+.modal-field label {
+  display: block;
+  font-size: 13px;
+  color: #ccc;
+  margin-bottom: 6px;
+}
+
+.modal-field input,
+.modal-field select {
+  width: 100%;
+  padding: 11px;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.modal-field input:focus,
+.modal-field select:focus {
+  outline: none;
+  border-color: #3b9eff;
+}
+
+.modal-error {
+  color: #ff6b6b;
+  font-size: 13px;
+  min-height: 16px;
+  margin-top: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.modal-btn-accept {
+  background-color: #3b9eff;
+  border: none;
+  color: #0d1117;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-btn-accept:hover { background-color: #2884e0; }
+
+.modal-btn-cancel {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.modal-btn-cancel:hover {
+  border-color: #3b9eff;
+  color: #3b9eff;
+}
+
+@media (max-width: 480px) {
+  .modal-card { padding: 22px 18px; }
+}
