@@ -19,6 +19,9 @@
         <button class="nav-item" data-section="admin" id="navAdmin" hidden>
           <span class="nav-icon">⚙</span> Administración
         </button>
+        <button class="nav-item" data-section="todas" id="navTodas" hidden>
+          <span class="nav-icon">▤</span> Todas las plataformas
+        </button>
         <button class="nav-item" data-section="cuenta">
           <span class="nav-icon">◔</span> Cuenta
         </button>
@@ -40,6 +43,7 @@
         <section class="view" id="view-inicio">
           <p class="section-label">Tus plataformas</p>
           <div class="cards-grid" id="platformsGrid"></div>
+          <button class="add-platform-btn" id="addMyPlatformBtn">+ Agregar plataforma</button>
         </section>
 
         <section class="view" id="view-admin" hidden>
@@ -52,9 +56,24 @@
           <div class="admin-users-list" id="adminUsersList"></div>
           <button class="add-platform-btn" id="addUserBtn">+ Crear usuario</button>
 
-          <p class="section-label section-label-spaced">Plataformas</p>
+          <p class="section-label section-label-spaced">Plataformas globales</p>
           <div class="admin-platforms-list" id="adminPlatformsList"></div>
           <button class="add-platform-btn" id="addPlatformBtn">+ Agregar plataforma</button>
+
+          <p class="section-label section-label-spaced">Asignar plataformas a usuarios</p>
+          <div class="modal-field assign-user-field">
+            <label for="asignarUsuarioSelect">Usuario</label>
+            <select id="asignarUsuarioSelect"></select>
+          </div>
+          <div class="admin-platforms-list" id="asignarPlataformasList"></div>
+        </section>
+
+        <section class="view" id="view-todas" hidden>
+          <p class="section-label">Plataformas globales (admin)</p>
+          <div class="admin-platforms-list" id="todasGlobalesList"></div>
+
+          <p class="section-label section-label-spaced">Plataformas propias de cada usuario</p>
+          <div id="todasPorUsuario"></div>
         </section>
 
         <section class="view" id="view-cuenta" hidden>

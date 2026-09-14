@@ -41,7 +41,8 @@ registroForm.addEventListener('submit', async (e) => {
 
     await db.ref('usuarios/' + uid).set({
       usuario: usuario,
-      rol: 'pendiente'
+      rol: 'usuario',
+      estado: 'pendiente'
     });
 
     await firebase.auth().signOut();

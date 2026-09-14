@@ -368,6 +368,55 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   gap: 8px;
 }
 
+.platform-owner-tag {
+  display: inline-block;
+  background-color: rgba(59, 158, 255, 0.12);
+  color: #3b9eff;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.platform-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.assign-user-field select {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.platform-assign-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #8b949e;
+  cursor: pointer;
+}
+
+.platform-assign-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.usuario-plataformas-bloque {
+  margin-bottom: 10px;
+}
+
+.usuario-plataformas-bloque .admin-platform-row {
+  margin-bottom: 8px;
+}
+
 .pending-row, .admin-platform-row, .admin-user-row {
   background-color: #161b22;
   border: 1px solid #30363d;
