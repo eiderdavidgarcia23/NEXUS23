@@ -290,6 +290,8 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   transition: background-color 0.15s;
 }
 
+.nav-item[hidden] { display: none; }
+
 .nav-icon { font-size: 15px; color: #8b949e; }
 
 .nav-item:hover { background-color: #21262d; }
@@ -407,6 +409,73 @@ body.dashboard-body-tag { display: block; min-height: 100vh; }
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+.todas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.todas-card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.todas-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.todas-card-top h4 {
+  font-size: 15px;
+  color: #fff;
+}
+
+.todas-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.todas-badge-global {
+  background-color: rgba(59, 158, 255, 0.15);
+  color: #3b9eff;
+}
+
+.todas-badge-personal {
+  background-color: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+}
+
+.todas-card-desc {
+  color: #8b949e;
+  font-size: 12.5px;
+  margin-bottom: 8px;
+}
+
+.todas-card-url {
+  display: block;
+  color: #8b949e;
+  font-size: 11.5px;
+  word-break: break-all;
+  text-decoration: none;
+}
+
+.todas-card-url:hover {
+  color: #3b9eff;
+}
+
+.todas-card-delete {
+  margin-top: 12px;
+  width: 100%;
 }
 
 .usuario-plataformas-bloque {

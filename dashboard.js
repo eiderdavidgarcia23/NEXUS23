@@ -192,12 +192,12 @@ const DEFAULT_PLATFORMS = {
 
 const platformsGrid = document.getElementById('platformsGrid');
 const adminPlatformsList = document.getElementById('adminPlatformsList');
-const platformsRef = db.ref('plataformas'); // catálogo global del admin
+const platformsRef = db.ref('plataformas'); // catálogo global: lo ve todo el mundo automáticamente
 
 // Caches en memoria que se actualizan con los listeners de Firebase
-let globalPlataformasCache = {};   // plataformas del admin (compartidas)
-let misPlataformasCache = {};      // plataformas propias del usuario normal
-let asignacionesCache = {};        // ids de plataformas globales asignadas a este usuario
+let globalPlataformasCache = {};   // plataformas globales (catálogo del admin)
+let misPlataformasCache = {};      // plataformas propias del usuario actual (incluido el admin)
+let asignacionesCache = {};        // ids de plataformas globales asignadas a este usuario (si no es admin)
 
 async function ensurePlatformsSeeded() {
   const snapshot = await platformsRef.once('value');
@@ -218,22 +218,22 @@ function checkStatus(url, dot, statusEl) {
     });
 }
 
-// Referencia según el "origen" de una plataforma: propia del usuario, o global del admin
+// Referencia según el "origen" de una plataforma: propia del usuario, o global (catálogo compartido)
 function refFor(source) {
   if (source === 'propia') return db.ref('usuarios/' + uidActual + '/misPlataformas');
   return platformsRef;
 }
 
-// Construye la lista de plataformas que le corresponde ver al usuario actual
+// El admin ve todo el catálogo global; el usuario normal solo ve lo que se le haya asignado
 function buildVisiblePlatforms() {
-  if (rolActual === 'admin') {
-    return Object.entries(globalPlataformasCache).map(([id, p]) => ({ id, data: p, editable: true, source: 'global' }));
-  }
   const propias = Object.entries(misPlataformasCache).map(([id, p]) => ({ id, data: p, editable: true, source: 'propia' }));
-  const asignadas = Object.entries(globalPlataformasCache)
-    .filter(([id]) => asignacionesCache[id])
-    .map(([id, p]) => ({ id, data: p, editable: false, source: 'global' }));
-  return [...propias, ...asignadas];
+
+  const entradasGlobales = rolActual === 'admin'
+    ? Object.entries(globalPlataformasCache)
+    : Object.entries(globalPlataformasCache).filter(([id]) => asignacionesCache[id]);
+
+  const globales = entradasGlobales.map(([id, p]) => ({ id, data: p, editable: false, source: 'global' }));
+  return [...propias, ...globales];
 }
 
 function renderPlatforms() {
@@ -255,7 +255,7 @@ function renderPlatforms() {
         <span class="status-dot status-checking" id="dot-${domKey}"></span>
         <span id="status-${domKey}">Verificando...</span>
       </div>
-      ${!editable ? '<span class="platform-owner-tag">Asignada por el admin</span>' : ''}
+      ${!editable ? `<span class="platform-owner-tag">${rolActual === 'admin' ? 'Plataforma global' : 'Asignada por el admin'}</span>` : ''}
       <a href="${p.url}" target="_blank" class="open-btn">Abrir plataforma →</a>
       ${editable ? `
         <div class="platform-card-actions">
@@ -270,7 +270,7 @@ function renderPlatforms() {
   platformsGrid.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id, source = btn.dataset.source;
-      const current = source === 'propia' ? misPlataformasCache[id] : globalPlataformasCache[id];
+      const current = misPlataformasCache[id];
       editPlatform(id, current, source);
     });
   });
@@ -333,9 +333,10 @@ async function deletePlatform(id, source) {
   await refFor(source).child(id).remove();
 }
 
+// Botón dentro de Administración: agrega al catálogo global (visible para todos)
 document.getElementById('addPlatformBtn').addEventListener('click', async () => {
   const result = await openModal({
-    title: 'Agregar plataforma',
+    title: 'Agregar plataforma global',
     fields: [
       { id: 'nombre', label: 'Nombre' },
       { id: 'descripcion', label: 'Descripción', required: false },
@@ -347,7 +348,7 @@ document.getElementById('addPlatformBtn').addEventListener('click', async () => 
   await platformsRef.child(id).set({ nombre: result.nombre, descripcion: result.descripcion, url: result.url });
 });
 
-// Botón de "Inicio": para admin agrega al catálogo global, para usuario agrega a sus propias plataformas
+// Botón de "Inicio": siempre agrega a las plataformas propias del usuario que esté conectado (admin incluido)
 document.getElementById('addMyPlatformBtn').addEventListener('click', async () => {
   const result = await openModal({
     title: 'Agregar plataforma',
@@ -359,8 +360,7 @@ document.getElementById('addMyPlatformBtn').addEventListener('click', async () =
   });
   if (!result) return;
   const id = result.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const source = rolActual === 'admin' ? 'global' : 'propia';
-  await refFor(source).child(id).set({ nombre: result.nombre, descripcion: result.descripcion, url: result.url });
+  await refFor('propia').child(id).set({ nombre: result.nombre, descripcion: result.descripcion, url: result.url });
 });
 
 async function cargarPlataformas() {
@@ -368,7 +368,6 @@ async function cargarPlataformas() {
     await ensurePlatformsSeeded();
   }
 
-  // Todos necesitan el catálogo global: el admin para gestionarlo, el usuario para ver lo que le asignen
   platformsRef.on('value', (snapshot) => {
     globalPlataformasCache = snapshot.val() || {};
     renderPlatforms();
@@ -377,11 +376,14 @@ async function cargarPlataformas() {
     }
   });
 
+  // Cada usuario (incluido el admin) tiene sus propias plataformas personales
+  db.ref('usuarios/' + uidActual + '/misPlataformas').on('value', (snapshot) => {
+    misPlataformasCache = snapshot.val() || {};
+    renderPlatforms();
+  });
+
+  // El usuario normal necesita saber qué plataformas globales tiene asignadas
   if (rolActual !== 'admin') {
-    db.ref('usuarios/' + uidActual + '/misPlataformas').on('value', (snapshot) => {
-      misPlataformasCache = snapshot.val() || {};
-      renderPlatforms();
-    });
     db.ref('asignaciones/' + uidActual).on('value', (snapshot) => {
       asignacionesCache = snapshot.val() || {};
       renderPlatforms();
@@ -489,13 +491,21 @@ function cargarTodasLasPlataformas() {
 
     if (entries.length === 0) {
       todasGlobalesList.innerHTML = '<p class="empty-msg">No hay plataformas globales.</p>';
+      return;
     }
 
     entries.forEach(([id, p]) => {
-      const row = document.createElement('div');
-      row.className = 'admin-platform-row';
-      row.innerHTML = `<div><strong>${p.nombre}</strong><span class="admin-platform-url">${p.url}</span></div>`;
-      todasGlobalesList.appendChild(row);
+      const card = document.createElement('div');
+      card.className = 'todas-card';
+      card.innerHTML = `
+        <div class="todas-card-top">
+          <h4>${p.nombre}</h4>
+          <span class="todas-badge todas-badge-global">Global</span>
+        </div>
+        ${p.descripcion ? `<p class="todas-card-desc">${p.descripcion}</p>` : ''}
+        <a class="todas-card-url" href="${p.url}" target="_blank">${p.url}</a>
+      `;
+      todasGlobalesList.appendChild(card);
     });
   });
 
@@ -512,18 +522,18 @@ function cargarTodasLasPlataformas() {
     conPlataformas.forEach(([uid, datos]) => {
       const bloque = document.createElement('div');
       bloque.className = 'usuario-plataformas-bloque';
-      const filas = Object.entries(datos.misPlataformas).map(([id, p]) => `
-        <div class="admin-platform-row">
-          <div>
-            <strong>${p.nombre}</strong>
-            <span class="admin-platform-url">${p.url}</span>
+      const cartas = Object.entries(datos.misPlataformas).map(([id, p]) => `
+        <div class="todas-card">
+          <div class="todas-card-top">
+            <h4>${p.nombre}</h4>
+            <span class="todas-badge todas-badge-personal">Personal</span>
           </div>
-          <div class="admin-platform-actions">
-            <button class="delete-btn" data-uid="${uid}" data-id="${id}">Eliminar</button>
-          </div>
+          ${p.descripcion ? `<p class="todas-card-desc">${p.descripcion}</p>` : ''}
+          <a class="todas-card-url" href="${p.url}" target="_blank">${p.url}</a>
+          <button class="delete-btn todas-card-delete" data-uid="${uid}" data-id="${id}">Eliminar</button>
         </div>
       `).join('');
-      bloque.innerHTML = `<p class="section-label section-label-spaced">${datos.usuario || uid}</p>${filas}`;
+      bloque.innerHTML = `<p class="section-label section-label-spaced">${datos.usuario || uid}</p><div class="todas-grid">${cartas}</div>`;
       todasPorUsuario.appendChild(bloque);
     });
 
