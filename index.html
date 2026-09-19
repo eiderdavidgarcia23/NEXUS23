@@ -15,6 +15,11 @@
   <div class="login-container">
     <div class="login-card">
       <h1><span class="brand-white">NEXUS</span><span class="brand-accent">23</span></h1>
+      <div id="pruebaIcono" style="text-align:center;margin-bottom:10px;font-size:12px;color:#8b949e">
+        <img src="apple-touch-icon.png" alt="icono" style="width:60px;height:60px;border-radius:12px;display:block;margin:0 auto 6px"
+             onerror="this.style.display='none';document.getElementById('pruebaIconoTexto').textContent='❌ NO CARGÓ el ícono (apple-touch-icon.png)';document.getElementById('pruebaIconoTexto').style.color='#ff6b6b'">
+        <span id="pruebaIconoTexto">✅ Si ves el logo arriba, el archivo sí carga bien</span>
+      </div>
       <p class="subtitle" id="cardSubtitle">Accede a tu centro de comando</p>
 
       <form id="loginForm">
